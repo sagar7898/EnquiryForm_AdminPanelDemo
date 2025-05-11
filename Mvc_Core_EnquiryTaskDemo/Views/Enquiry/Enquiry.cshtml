@@ -1,0 +1,120 @@
+﻿@model IEnumerable<Mvc_Core_EnquiryTaskDemo.Models.FetchEnquiryModel>
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Enquiry</title>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            $("#btnEmail").click(function () {
+                SendEmail();
+            })
+
+            // $("#namefilter").keyup(function () {
+            //     filtername()
+            // })
+        
+            function SendEmail() {
+
+                var Emaildata = document.getElementsByName("Email");
+                console.log(Emaildata)
+                email = "";
+                Emaildata.forEach(function (d, k) {
+
+                    if (d.checked) {
+                        email += "," + d.value;
+                    }                
+
+                 })
+                 email = email.substr(1, email.length - 1);
+                 console.log(email);
+                var st = {"Email":email}
+                $.ajax({
+                    url:'/Enquiry/GetEmails',
+                    method:'post',  
+                    data:st,
+                    success: function (resp) {
+
+                    }
+                })
+          
+            }
+        })
+
+        // function filtername(){
+        //     f = $("#namefilter").val();
+        //     $("#tbl").empty();
+            
+        //     $.each(Model, function (i, d) {
+                
+        //         if (d.CandidateName.toLowerCase().includes(f.toLowerCase())) {
+                    
+                    
+        //             $("#tbl").append("<tr><td>" + d.CandidateName +"</td></tr>");
+        //         }
+        //     })
+                
+        // }
+        
+    </script>
+</head>
+<body>
+    <div class="container-fluid row">
+        <div class="col-md-2">
+            <a href="/Candidate/Index">Get new Enquiry</a>
+        </div>
+   
+    <div class="col-md-9">
+            
+        @{
+                int cnt = 0;
+                
+        }
+        
+        <table class="table-bordered table table-responsive" id="tbl">
+            <thead class="bg-success">
+            <tr>
+                <td>sr.no</td>
+                <td>Candidate name</td>
+                <td>Mobile number</td>
+                <td>Email Address</td>
+                <td>Interested Topics </td>
+                <td>Action</td>
+            </tr>
+            </thead>
+            <tbody>
+                @{
+                    
+                                                    @foreach(var d in Model)
+                    {
+                        cnt++;
+                                                        <tr>
+                                                               
+                                                            <td><input type="checkbox" name="Email" value="@d.EmailAdress" />&nbsp;&nbsp;@cnt</td>
+                                                            <td>@d.CandidateName</td>
+                                                            <td>@d.MobileNumber</td>
+                                                            <td>@d.EmailAdress</td>
+                                                            <td>@d.InterestedTopics </td>
+                                                            <td>Action</td>
+                                                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+        <div>
+                <div><input type="text" value="Total Candidates = @cnt" readonly/></div>
+            <button class="btn btn-primary" id="btnEmail">Send Email</button>
+        </div>
+    </div>
+    </div>
+</body>
+</html>

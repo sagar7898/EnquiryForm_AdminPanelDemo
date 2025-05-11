@@ -1,0 +1,400 @@
+﻿@model Mvc_Core_EnquiryTaskDemo.Models.TblCandidateEnquiry;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Index</title>
+    <link href="~/lib/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+   <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+   
+
+    <script>
+        var candidate = [];
+        var candidateSpecialization = [];
+        var ef = "";
+        var source = "";
+        var topic = "";
+        var CandidateEnquiries = [];
+        var QualificationName = "";
+        var SpecializationName = "";
+        $(document).ready(function () {
+
+            GetQualifications();
+            
+            
+
+
+            $("#btnsubmit").click(function(){
+                
+                AddCandidateSpecialization();
+                AddEnquiry();
+                AddSource();
+                Addtopics();
+                AddCandidateEnquiries();
+                AddCandidateDetails();               
+                
+
+            })
+
+            $("#btnadd").click(function () {
+                GetQualificationsById();
+                GetSpecializationsById();
+                AddQualifications();
+
+            })
+
+            $("#dropqualification").change(function () {
+                GetSpecializations();
+            })
+        })
+
+        function GetQualifications() {
+            $.ajax({
+                url:'/Candidate/GetQualifications',
+                method:'get',
+                success: function(resp) {
+                    
+                    $.each(resp, function (i, d) {
+                        $("#dropqualification").append("<option value=" + d.qualificationId + ">" + d.qualificationName + "</option>");
+                        
+                    })
+                }
+            })
+        }
+
+        function GetSpecializations(){
+            var qualification_id = $("#dropqualification").val();
+            $.ajax({
+                url: '/Candidate/GetSpecializations/' + qualification_id,
+                method: 'get',
+                success: function (resp) {
+                    $("#dropspecialization").empty();
+                    $.each(resp, function (i, d) {
+                        $("#dropspecialization").append("<option value=" + d.specializationId + ">" + d.specializationName + "</option>");
+                        
+                    })
+                }
+            })
+        }
+
+        function GetQualificationsById() {
+            var id = $("#dropqualification").val();
+            
+            $.ajax({
+                url: '/Candidate/GetQualification/'+id,
+                method: 'get',
+                success: function (resp) {
+
+                    QualificationName = resp.qualificationName;
+                   
+                }
+            })
+        }
+
+        function GetSpecializationsById() {
+            var id = $("#dropspecialization").val();
+            $.ajax({
+                url: '/Candidate/GetSpecialization/' + id,
+                method: 'get',
+                success: function (resp) {
+                    
+                     SpecializationName = resp.specializationName;
+                   
+                }
+            })
+        }
+
+        
+
+        function AddEnquiry() {
+            var enquirydata = document.getElementsByName("enquiryfor");
+            //console.log(enquirydata)
+             ef = "";
+            enquirydata.forEach(function (d, k) {
+
+                if (d.checked) {
+                    ef += "," + d.value;
+
+                }
+
+            })
+            ef = ef.substr(1, ef.length - 1);
+            //console.log(ef)
+        }
+
+        function AddSource() {
+            var sourcedata = document.getElementsByName("source");
+            //console.log(enquirydata)
+             source = "";
+            sourcedata.forEach(function (d, k) {
+
+                if (d.checked) {
+                    source += "," + d.value;
+
+                }
+
+            })
+            source = source.substr(1, source.length - 1);
+            // console.log(ef)
+        }
+
+        function Addtopics() {
+            var topicsdata = document.getElementsByName("topics");
+            //console.log(enquirydata)
+             topic = "";
+            topicsdata.forEach(function (d, k) {
+
+                if (d.checked) {
+                    topic += "," + d.value;
+
+                }
+
+            })
+            topic = topic.substr(1, topic.length - 1);
+            //console.log(ef)
+        }
+
+        
+
+        function AddQualifications() {
+            var qualification = $("#dropqualification").val();
+            var specialization = $("#dropspecialization").val();
+            var medium = $("#txtmedium").val();
+            var university = $("#txtuniversity").val();
+            var year = $("#txtyear").val();
+            var percentage = $("#txtpercentage").val();
+            st = { "SpecializationId": specialization, "qualiName": QualificationName, "spName": SpecializationName, "Medium": medium, "University": university, "PassingYear": year, "Percentage": percentage };
+            candidate.push(st);
+
+            $("#tbldata").empty();
+            $.each(candidate,function(i,d){
+                $("#tbldata").append("<tr><td>" + (i + 1) + "</td><td>" + d.qualiName + "</td><td>" + d.spName + "</td><td>" + d.Medium + "</td><td>" + d.University + "</td><td>" + d.PassingYear + "</td><td>" + d.Percentage + "</td></tr>")
+            })
+
+            ClearData();
+        }
+
+        function ClearData() {
+            $("#dropqualification").val("Qualification");
+            $("#dropspecialization").append("<option>Specialization</option>");
+            $("#txtmedium").val("");
+            $("#txtuniversity").val("");
+            $("#txtyear").val("");
+            $("#txtpercentage").val("");
+        }
+
+        function AddCandidateSpecialization() {
+
+            var courseName = $("#txtspcourse").val();
+            var instituteName = $("#txtinstitutename").val();
+            var st = { "CourseName": courseName, "InstituteName": instituteName };
+            candidateSpecialization.push(st);
+            
+            
+        }
+
+        function AddCandidateEnquiries(){
+            var date = new Date().toLocaleDateString();
+            var enquiryFor =ef;
+            var enquirysource =source;
+            var enquiryTopics=topic
+            var st = { "EnquiryDate": date, "EnquiryFor": enquiryFor, "EnquirySources": enquirysource, "TrainingTopics": enquiryTopics, "Status": "Success" };
+            CandidateEnquiries.push(st);
+        }
+
+
+
+        function AddCandidateDetails() {
+            var name = $("#txtname").val();
+            var date = $("#txtdate").val();
+            var mobile = $("#txtmobile").val();
+            var address = $("#txtaddress").val();
+            var email = $("#txtemail").val();
+            st = { "CandidateName": name, "MobileNumber": mobile, "Birthdate": date, "EmailAddress": email, "LocalAddress": address, "TblCandidateQualifications": candidate, "TblCandidateSpecializations": candidateSpecialization, "TblCandidateEnquiries":CandidateEnquiries }
+            $.ajax({
+                url: '/Candidate/AddCandidateDetails',
+                method: 'post',
+                data: st,
+                success: function () {
+
+                }
+            })
+        }
+
+
+        
+
+
+
+       
+
+    </script>
+
+
+</head>
+<body>
+    <a href="/Enquiry/Enquiry">GetEnquiries</a>
+
+    <div class="container-fluid row">
+        <div class="col-md-3">
+
+        </div>
+    <div class="col-md-9">
+
+        <div>
+            <center> <label style="font-size:20px"><b>Enquiry Form</b></label></center>
+        </div>
+        <div class="card bg-success">
+            <div class="card-header">
+                <center><label style="font-size:15px"><b>Candidate basic Information</b></label></center>
+            </div>
+            <div class="card-body row" style="background-color:white ">
+                <div class="mb-3 col-md-3">
+                    <input type="date" class="form-control" id="txtdate" />
+                </div>
+                <div class="mb-3 col-md-6">
+                        <input type="text" class="form-control" id="txtname" placeholder="Enter your name" />
+                </div>
+                <div class="mb-3 col-md-3">
+                        <input type="text" class="form-control" id="txtmobile" placeholder="Mobile Number" />
+                </div>
+                <div class="mb-3 col-md-8">
+                        <textarea type="text" class="form-control" id="txtaddress" placeholder="Enter your local address"></textarea>
+                </div>
+                <div class="mb-3 col-md-4">
+                        <input type="text" class="form-control" id="txtemail" placeholder="Enter your Email address" />
+                </div>
+            </div>
+        </div>
+
+
+            <div class="card bg-success">
+                <div class="card-header">
+                    <center><label style="font-size:15px"><b>Educational Details</b></label></center>
+                </div>
+                <div class="card-body row" style="background-color:white ">
+                    <div class="mb-3 col-md-2">
+                        <select id="dropqualification" class="form-control">
+                            <option selected disabled >Qualification</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 col-md-2">
+                        <select id="dropspecialization" class="form-control">
+                            <option selected disabled>Specialization</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 col-md-2">
+                        <input type="text" class="form-control" id="txtmedium" placeholder="Medium" />
+                    </div>
+                    <div class="mb-3 col-md-2">
+                        <input type="text" class="form-control" id="txtuniversity" placeholder="University"/>
+                    </div>
+                    <div class="mb-3 col-md-2">
+                        <input type="text" class="form-control" id="txtyear" placeholder="year" />
+                    </div>
+                    <div class="mb-3 col-md-1">
+                        <input type="text" class="form-control" id="txtpercentage" placeholder="percentage" />
+                    </div>
+                    <div class="mb-3 col-md-1">
+                        <input type="button" class="form-control" id="btnadd" value="+" />
+                    </div>
+                    <div class="mb-3 col-md-12">
+                        <table class="table table-bordered table-responsive">
+                            <thead>
+                                <tr>
+                                    <th>Sr.No</th>
+                                    <th>Qualification</th>
+                                    <th>Specialization</th>
+                                    <th>Medium</th>
+                                    <th>University</th>
+                                    <th>year</th>
+                                    <th>Percentage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbldata"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer row bg-light">
+                    <div class="col-md-6">
+                         <input type="text" class="form-control" id="txtspcourse" placeholder="Specialization Course" />
+                    </div>
+                    <div class="col-md-6">
+                         <input type="text" class="form-control" id="txtinstitutename" placeholder="Institute Name" />
+                    </div>
+
+                </div>
+            </div>
+
+
+            <div class="card">
+                <div class="card-header bg-success">
+                    <center><label style="font-size:15px"><b>Enquiry For</b></label></center>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach(var e in ViewBag.enquiry)
+                        {
+                            <div class="col-md-4">
+                                <input type="checkbox" name="enquiryfor" value="@e.EnquiryFor"/><span>@e.EnquiryFor</span>
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+            </div>
+
+            <br /><br />
+
+            <div class="card">
+                <div class="card-header bg-success">
+                    <center><label style="font-size:15px"><b>How did you come to know about us ? </b></label></center>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var e in ViewBag.source)
+                        {
+                            <div class="col-md-4">
+                                <input type="checkbox" name="source" value="@e.SourceName" /><span>@e.SourceName</span>
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-success">
+                    <center><label style="font-size:15px"><b>How did you come to know about us ? </b></label></center>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        @foreach (var e in ViewBag.topics)
+                        {
+                            <div class="col-md-4">
+                                <input type="checkbox" name="topics" value="@e.TopicName" /><span>@e.TopicName</span>
+                            </div>
+                        }
+
+                    </div>
+
+                </div>
+            </div>
+
+            <br />
+            <br />
+
+            <input type="button" class="btn btn-danger" value="Submit " id="btnsubmit"/>
+    </div>
+        
+  </div>
+</body>
+</html>
